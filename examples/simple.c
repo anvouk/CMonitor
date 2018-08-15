@@ -26,40 +26,72 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "cmonitor/cm.h"
-
+/* link to cmonitor.lib */
 #ifdef _MSC_VER
+#  define CMAPI __declspec(dllimport)
 #  pragma comment(lib, "CMonitor.lib")
 #endif /* _MSC_VER */
+
+#include "cmonitor/cm.h"
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 #  define malloc cm_malloc
 #  define free   cm_free
 #endif
 
-void on_err(const char* msg)
+static void on_err(const char* msg)
 {
 	printf("error: %s\n", msg);
 }
 
+static void print_leaks(cm_leak_info** leaks, size_t size)
+{
+	size_t i;
+	cm_leak_info* leak;
+
+	puts("=== leaks begin ===");
+	for (i = 0; i < size; i++) {
+		leak = leaks[i];
+		printf("%d. [%s:%d] %d bytes (address: %#010x)\n", i + 1,
+			   leak->filename, leak->line, leak->bytes, (unsigned)leak->address);
+	}
+	puts("=== leaks end =====\n");
+}
+
+static void leaks_check(void)
+{
+	size_t leaks_count;
+	cm_leak_info** leaks = NULL;
+
+	cm_get_leaks(&leaks, &leaks_count);
+	print_leaks(leaks, leaks_count);
+
+	cm_free_leaks_info(leaks, leaks_count);
+}
+
 int main(int argc, char* argv[])
 {
+	void *mem1, *mem2, *mem3, *mem4;
+
+
+	printf("cmonitor | %s | examples/simple.c\n\n", CM_VERSION_STR);
 
 #if defined(_DEBUG) || !defined(NDEBUG)
-	if (!cm_init(stdout, on_err))
+	if (!cm_init(stdout, on_err, CM_SIGNAL_ALL))
 		return 0;
 #endif
 
-	void* mem1 = malloc(100);
-	void* mem2 = malloc(200);
-	void* mem3 = malloc(300);
+	mem1 = malloc(100);
+	mem2 = malloc(200);
+	mem3 = malloc(300);
 	free(mem1);
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 	cm_print_stats();
+	leaks_check();
 #endif
 
-	void* mem4 = malloc(400);
+	mem4 = malloc(400);
 	free(mem2);
 	free(mem4);
 	free(mem3);
@@ -71,6 +103,7 @@ int main(int argc, char* argv[])
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 	cm_print_stats();
+	leaks_check();
 #endif
 
 	getchar();

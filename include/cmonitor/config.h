@@ -34,48 +34,33 @@
 #define CM_STR_(x) #x
 #define CM_STR CM_STR_
 
-#define CM_VERSION_MAJOR 1
+#define CM_VERSION_MAJOR 2
 #define CM_VERSION_MINOR 0
 #define CM_VERSION_PATCH 0
 #define CM_VERSION_STATE "stable"
 
-#define CM_VERSION_STR \
-	CM_STR(_C4C_VERSION_MAJOR) "." \
-	CM_STR(_C4C_VERSION_MINOR) "." \
-	CM_STR(_C4C_VERSION_PATCH) "-" \
+#define _CM_VERSION_STR(major, minor, patch) \
+	CM_STR(major) "." \
+	CM_STR(minor) "." \
+	CM_STR(patch) "-" \
 	CM_VERSION_STATE
 
-#define CM_VERSION_MAKE(maj, min, patch) \
-	((maj) << 16) | ((min) << 8) | (patch))
+#define CM_VERSION_STR \
+	_CM_VERSION_STR(CM_VERSION_MAJOR, CM_VERSION_MINOR, CM_VERSION_PATCH)
+
+#define CM_VERSION_MAKE(major, minor, patch) \
+	((major) << 16) | ((minor) << 8) | (patch))
+
+/*------------------------------------------------------------------------------
+	Linker settings
+------------------------------------------------------------------------------*/
 
 #ifndef CMCALL
-#  define CMCALL __cdecl
+#  define CMCALL
 #endif /* !CMCALL */
 
-#if defined(_WIN32) || defined(__CYGWIN__)
-#  ifdef CM_BUILDING_DLL
-#    ifdef __GNUC__
-#      define CMAPI __attribute__ ((dllexport))
-#    else
-#      define CMAPI __declspec(dllexport)
-#    endif /* CM_BUILDING_DLL */
-#  else
-#    ifdef CM_USE_INLINE
-#      define CMAPI
-#    else
-#      ifdef __GNUC__
-#        define CMAPI __attribute__ ((dllimport))
-#      else
-#        define CMAPI __declspec(dllimport)
-#      endif /* __GNUC__ */
-#    endif /* CM_USE_INLINE */
-#  endif /* CM_BUILDING_DLL */
-#else
-#  if __GNUC__ >= 4
-#    define CMAPI __attribute__ ((visibility ("default")))
-#  else
-#    define CMAPI
-#  endif /* __GNUC__ >= 4 */
-#endif /* defined(_WIN32) || defined(__CYGWIN__) */
+#ifndef CMAPI
+#  define CMAPI
+#endif /* !CMAPI */
 
 #endif /* CM_CONFIG_H */
