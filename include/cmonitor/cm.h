@@ -53,41 +53,106 @@ typedef struct cm_leak_info {
  * The program's allocation/deallocation balance.
  */
 typedef struct cm_stats {
-	uint32_t total_allocated; /**< Total allocated bytes from the initialization 
+	uint32_t total_allocated; /**< Total allocated bytes since the initialization 
 	                               of the library till the end of the program. */
-	uint32_t total_freed;     /**< Total freed bytes from the initialization 
+	uint32_t total_freed;     /**< Total freed bytes since the initialization 
 	                               of the library till the end of the program. */
 	uint32_t malloc_count;    /**< Number of times the malloc function has been 
-	                               called from the initialization of the library 
+	                               called since the initialization of the library 
 	                               till the end of the program. */
 	uint32_t free_count;      /**< Number of times the free function has been 
-	                               called from the initialization of the library 
+	                               called since the initialization of the library 
+	                               till the end of the program. */
+	uint32_t calloc_count;    /**< Number of times the calloc function has been
+	                               called since the initialization of the library 
+	                               till the end of the program. */
+	uint32_t realloc_count;   /**< Number of times the realloc function has been
+	                               called since the initialization of the library 
 	                               till the end of the program. */
 } cm_stats;
 
-typedef void(CMCALL *cm_error_fn)(const char* msg);
+/**
+ * Callback function prototype for errors/warnings/infos.
+ */
+typedef void(*cm_error_fn)(int cm_err, const char* msg);
 
 /*------------------------------------------------------------------------------
 	Initialization flags
 ------------------------------------------------------------------------------*/
 
 /**
+ * If set, call cm_error_fn upon attempting to call malloc() with size set to
+ * zero (Undefined behavior).
+ */
+#define CM_SIGNAL_ON_MALLOC_SIZE_ZERO  0x0001
+
+/**
  * If set, call cm_error_fn upon attempting to free a NULL pointer. Ignore 
  * otherwise.
  */
-#define CM_SIGNAL_ON_FREEING_NULL    0x0001
+#define CM_SIGNAL_ON_FREEING_NULL      0x0010
 
 /**
- * If set, call cm_error_fn upon attempting to free a valid that has not been 
- * previously registered with cm_malloc.
+ * If set, call cm_error_fn upon attempting to free a valid(?) memory block that
+ * has not been previously registered with cm_malloc.
  */
-#define CM_SIGNAL_ON_FREEING_UNKNOWN 0x0002
+#define CM_SIGNAL_ON_FREEING_UNKNOWN   0x0020
+
+/**
+ * If set, call cm_error_fn upon attempting to call calloc() with size set to
+ * zero (Undefined behavior).
+ */
+#define CM_SIGNAL_ON_CALLOC_SIZE_ZERO  0x0100
+
+/**
+ * If set, call cm_error_fn upon attempting to reallocate an
+ * unregistered/unknown memory block.
+ */
+#define CM_SIGNAL_ON_REALLOC_UNKNOWN   0x1000
+
+/**
+ * If set, call cm_error_fn upon attempting to call realloc() with size set to
+ * zero (Undefined behavior).
+ */
+#define CM_SIGNAL_ON_REALLOC_SIZE_ZERO 0x2000
 
 /**
  * If set, call cm_error_fn whenever some irregularity happens.
  */
 #define CM_SIGNAL_ALL \
-	(CM_SIGNAL_ON_FREEING_NULL | CM_SIGNAL_ON_FREEING_UNKNOWN)
+	( \
+		CM_SIGNAL_ON_MALLOC_SIZE_ZERO  | \
+		CM_SIGNAL_ON_FREEING_NULL      | \
+		CM_SIGNAL_ON_FREEING_UNKNOWN   | \
+		CM_SIGNAL_ON_CALLOC_SIZE_ZERO  | \
+		CM_SIGNAL_ON_REALLOC_UNKNOWN   | \
+		CM_SIGNAL_ON_REALLOC_SIZE_ZERO   \
+	)
+
+/*------------------------------------------------------------------------------
+	Error flags
+------------------------------------------------------------------------------*/
+
+/**
+ * Info.
+ */
+#define CM_ERR_INFO    0
+
+/**
+ * The function will immediately return.
+ */
+#define CM_ERR_WARNING 1
+
+/**
+ * An error has occurred/will occur. The program will be terminated.
+ */
+#define CM_ERR_ERROR   2
+
+/**
+ * An undefined behavior situation has been reached. By default the program will
+ * NOT be terminated and something bad will probably happen.
+ */
+#define CM_ERR_UB      3
 
 /*------------------------------------------------------------------------------
 	Library functions
@@ -152,13 +217,16 @@ CMAPI void CMCALL cm_free_leaks_info(cm_leak_info** leak_array, size_t size);
  * @note Use the cm_malloc macro by defining malloc as cm_malloc when you want
  *       to enable allocation checking.
  *
- * @param size      The amount of bytes to allocate.
- * @param filename  The filename where this function is getting called from.
- * @param line      The line where this function is getting called from.
+ * @param size        The amount of bytes to allocate.
+ * @param filename    The filename where this function is getting called from.
+ * @param line        The line where this function is getting called from.
+ * @param is_realloc  Internal use (set to 1 by cm_realloc_ when allocating an
+ *                    entirely new block).
  *
- * @return NULL on malloc failure. A pointer to the allocated memory otherwise.
+ * @return On success, a pointer to the memory block allocated by the function.
+ *         NULL otherwise.
  */
-CMAPI void* CMCALL cm_malloc_(size_t size, const char* filename, int line);
+CMAPI void* CMCALL cm_malloc_(size_t size, const char* filename, int line, int is_realloc);
 
 /**
  * A wrapper around C free used to store deallocation infos.
@@ -172,11 +240,42 @@ CMAPI void* CMCALL cm_malloc_(size_t size, const char* filename, int line);
  */
 CMAPI void CMCALL cm_free_(void* mem, const char* filename, int line);
 
+/**
+ * A wrapper around C calloc used to store allocation infos.
+ *
+ * @param num       Number of elements to allocate.
+ * @param size      The size of each element.
+ * @param filename  The filename where this function is getting called from.
+ * @param line      The line where this function is getting called from.
+ *
+ * @return On success, a pointer to the memory block allocated by the function.
+ *         NULL otherwise.
+ */
+CMAPI void* CMCALL cm_calloc_(size_t num, size_t size, const char* filename, int line);
+
+/**
+ * A wrapper around C realloc used to store reallocation infos.
+ *
+ * @note If mem is NULL, cm_malloc_ will be called instead.
+ *
+ * @param mem       Pointer to a memory block previously allocated. If NULL
+ *                  allocates a new block of memory.
+ * @param size      New size for the memory block, in bytes.
+ * @param filename  The filename where this function is getting called from.
+ * @param line      The line where this function is getting called from.
+ *
+ * @return On success, a pointer to the memory block allocated by the function.
+ *         NULL otherwise.
+ */
+CMAPI void* CMCALL cm_realloc_(void* mem, size_t size, const char* filename, int line);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#define cm_malloc(size) cm_malloc_(size, __FILE__, __LINE__)
-#define cm_free(mem)   cm_free_(mem, __FILE__, __LINE__)
+#define cm_malloc(size)       cm_malloc_ (size, __FILE__, __LINE__, 0)
+#define cm_free(mem)          cm_free_   (mem, __FILE__, __LINE__)
+#define cm_calloc(num, size)  cm_calloc_ (num, size, __FILE__, __LINE__)
+#define cm_realloc(mem, size) cm_realloc_(mem, size, __FILE__, __LINE__)
 
 #endif /* CM_CM_H */

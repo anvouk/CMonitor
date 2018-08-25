@@ -34,10 +34,10 @@
 #define CM_STR_(x) #x
 #define CM_STR CM_STR_
 
-#define CM_VERSION_MAJOR 2
-#define CM_VERSION_MINOR 0
+#define CM_VERSION_MAJOR 0
+#define CM_VERSION_MINOR 3
 #define CM_VERSION_PATCH 0
-#define CM_VERSION_STATE "stable"
+#define CM_VERSION_STATE "beta"
 
 #define _CM_VERSION_STR(major, minor, patch) \
 	CM_STR(major) "." \

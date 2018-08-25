@@ -56,6 +56,8 @@ static void on_err(int cm_err, const char* msg)
 			break;
 		case CM_ERR_UB:
 			printf("[UNKNOWN BEHAVIOR] %s\n", msg);
+			getchar();
+			exit(EXIT_FAILURE);
 			break;
 
 	}
@@ -69,8 +71,8 @@ static void print_leaks(cm_leak_info** leaks, size_t size)
 	puts("=== leaks begin ===");
 	for (i = 0; i < size; i++) {
 		leak = leaks[i];
-		printf("%d. [%s:%d] <%p> %d bytes\n", i + 1,
-			   leak->filename, leak->line, leak->address, leak->bytes);
+		printf("%d. [%s:%d] %d bytes (address: %#010x)\n", i + 1,
+			   leak->filename, leak->line, leak->bytes, (unsigned)leak->address);
 	}
 	puts("=== leaks end =====\n");
 }
@@ -88,9 +90,9 @@ static void leaks_check(void)
 
 int main(int argc, char* argv[])
 {
-	void *mem1, *mem2, *mem3, *mem4;
+	void *mem1;
 
-	printf("cmonitor | %s | examples/simple.c\n\n", CM_VERSION_STR);
+	printf("cmonitor | %s | examples/realloc.c\n\n", CM_VERSION_STR);
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 	if (!cm_init(stdout, on_err, CM_SIGNAL_ALL))
@@ -98,25 +100,14 @@ int main(int argc, char* argv[])
 #endif
 
 	mem1 = malloc(100);
-	mem2 = malloc(200);
-	mem3 = malloc(300);
-	free(mem1);
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 	cm_print_stats();
 	leaks_check();
 #endif
 
-	mem4 = malloc(400);
-	free(mem2);
-	mem3 = realloc(mem3, 600);
-	free(mem4);
-	free(mem3);
-
-	/* Test errors */
-	/*
-	free(NULL);
-	*/
+	mem1 = realloc(mem1, 300);
+	free(mem1);
 
 #if defined(_DEBUG) || !defined(NDEBUG)
 	cm_print_stats();
