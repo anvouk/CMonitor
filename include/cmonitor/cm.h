@@ -273,9 +273,9 @@ CMAPI void* CMCALL cm_realloc_(void* mem, size_t size, const char* filename, int
 }
 #endif /* __cplusplus */
 
-#define cm_malloc(size)       cm_malloc_ (size, __FILE__, __LINE__, 0)
-#define cm_free(mem)          cm_free_   (mem, __FILE__, __LINE__)
-#define cm_calloc(num, size)  cm_calloc_ (num, size, __FILE__, __LINE__)
-#define cm_realloc(mem, size) cm_realloc_(mem, size, __FILE__, __LINE__)
+#define cm_malloc(size)       cm_malloc_ (size, CM_THIS_FILE, CM_THIS_LINE, 0)
+#define cm_free(mem)          cm_free_   (mem, CM_THIS_FILE, CM_THIS_LINE)
+#define cm_calloc(num, size)  cm_calloc_ (num, size, CM_THIS_FILE, CM_THIS_LINE)
+#define cm_realloc(mem, size) cm_realloc_(mem, size, CM_THIS_FILE, CM_THIS_LINE)
 
 #endif /* CM_CM_H */

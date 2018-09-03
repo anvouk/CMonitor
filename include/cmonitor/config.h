@@ -36,7 +36,7 @@
 
 #define CM_VERSION_MAJOR 0
 #define CM_VERSION_MINOR 3
-#define CM_VERSION_PATCH 0
+#define CM_VERSION_PATCH 1
 #define CM_VERSION_STATE "beta"
 
 #define _CM_VERSION_STR(major, minor, patch) \
@@ -57,10 +57,22 @@
 
 #ifndef CMCALL
 #  define CMCALL
-#endif /* !CMCALL */
+#endif
 
 #ifndef CMAPI
 #  define CMAPI
-#endif /* !CMAPI */
+#endif
+
+/*------------------------------------------------------------------------------
+	Other settings
+------------------------------------------------------------------------------*/
+
+#ifndef CM_THIS_FILE
+#  define CM_THIS_FILE __FILE__
+#endif
+
+#ifndef CM_THIS_LINE
+#  define CM_THIS_LINE __LINE__
+#endif
 
 #endif /* CM_CONFIG_H */
