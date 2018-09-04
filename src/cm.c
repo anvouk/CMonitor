@@ -34,6 +34,10 @@
 #include <stdint.h>
 #include <stdarg.h>
 
+/* make cm_alloc_map functions private */
+#define C4C_FUNCTION(rettype, name, ...) \
+	static rettype CMCALL name(__VA_ARGS__)
+
 #define C4C_PARAM_STRUCT_NAME cm_alloc_map
 #define C4C_PARAM_PREFIX cm_map
 #define C4C_PARAM_CONTENT void* block; size_t size; const char* filename; int line;

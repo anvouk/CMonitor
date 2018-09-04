@@ -36,7 +36,7 @@
 
 #define CM_VERSION_MAJOR 0
 #define CM_VERSION_MINOR 3
-#define CM_VERSION_PATCH 1
+#define CM_VERSION_PATCH 2
 #define CM_VERSION_STATE "beta"
 
 #define _CM_VERSION_STR(major, minor, patch) \
