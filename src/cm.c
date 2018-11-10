@@ -34,19 +34,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 
-/* make cm_alloc_map functions private */
-#define C4C_FUNCTION(rettype, name, ...) \
-	static rettype CMCALL name(__VA_ARGS__)
-
-#define C4C_PARAM_STRUCT_NAME cm_alloc_map
-#define C4C_PARAM_PREFIX cm_map
-#define C4C_PARAM_CONTENT void* block; size_t size; const char* filename; int line;
-#include "c4c/linked_list/double_list_decl.inl"
-
-#define C4C_PARAM_STRUCT_NAME cm_alloc_map
-#define C4C_PARAM_PREFIX cm_map
-#define C4C_PARAM_CONTENT void* block; size_t size; const char* filename; int line;
-#include "c4c/linked_list/double_list_impl.inl"
+#include "c4c_linked_list.h"
 
 static struct {
 	uint32_t flags;
@@ -187,13 +175,12 @@ void cm_get_leaks(cm_leak_info*** out_array, size_t* out_leaks_count)
 			free(*out_array);
 			goto zero_all;
 		}
-		//strcpy(leak->filename, il->filename);
 		leak->filename = il->filename;
 		leak->line = il->line;
 		leak->bytes = il->size;
 		leak->address = il->block;
 		(*out_array)[i] = leak;
-		i++;
+		++i;
 	}
 	*out_leaks_count = delta;
 	return;
@@ -209,7 +196,7 @@ void cm_free_leaks_info(cm_leak_info** leak_array, size_t size)
 
 	if (!leak_array || size == 0)
 		return;
-	for (i = 0; i < size; i++) {
+	for (i = 0; i < size; ++i) {
 		free(leak_array[i]);
 	}
 	free(leak_array);
@@ -245,7 +232,7 @@ void* cm_malloc_(size_t size, const char* filename, int line, int is_realloc)
 	node->line = line;
 	/* update stats */
 	settings.info.total_allocated += size;
-	settings.info.malloc_count++;
+	++settings.info.malloc_count;
 	cm_map_add(&settings.map, node);
 	/* report allocation to output */
 	if (is_realloc)
@@ -312,7 +299,7 @@ void* cm_calloc_(size_t num, size_t size, const char* filename, int line)
 	node->line = line;
 	/* update stats */
 	settings.info.total_allocated += num * size;
-	settings.info.calloc_count++;
+	++settings.info.calloc_count;
 	cm_map_add(&settings.map, node);
 	/* report allocation to output */
 	fprintf(settings.output, "[%s:%d] <%p> calloc(%d, %d) | total: %d\n",
@@ -350,7 +337,7 @@ void* cm_realloc_(void* mem, size_t size, const char* filename, int line)
 		notify(CM_ERR_WARNING, "reallocated unknown memory block.");
 	/* update stats */
 	settings.info.total_allocated += (size - old_size);
-	settings.info.realloc_count++;
+	++settings.info.realloc_count;
 	/* report reallocation to output */
 	fprintf(settings.output, "[%s:%d] <%p> realloc(from: %d, to: %d) | diff: %d\n",
 			get_filename(filename), line, new_mem, old_size, size, size - old_size);

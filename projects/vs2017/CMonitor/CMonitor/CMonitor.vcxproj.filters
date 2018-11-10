@@ -20,5 +20,8 @@
     <ClInclude Include="..\..\..\..\include\cmonitor\config.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\src\c4c_linked_list.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

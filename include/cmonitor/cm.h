@@ -171,6 +171,7 @@ extern "C" {
  * @param output    The output where allocations/deallocations infos will be
  *                  printed to.
  * @param on_error  On errors this function will be called unless set to NULL.
+ * @param flags     The initialization flags.
  *
  * @retval 0  On failure (is output a non-null parameter?)
  * @retval 1  On success.
@@ -192,7 +193,7 @@ CMAPI void CMCALL cm_get_stats(cm_stats* out);
 
 /**
  * Get a cm_leak_info heap-allocated array of size out_leaks_count with all the
- * non-deallocated (yet) memory blocks infos.
+ * (yet) non-deallocated memory blocks infos.
  *
  * @param out_array        A pointer to a cm_leak_info** array.
  * @param out_leaks_count  The number of possible memory leaks and the size of

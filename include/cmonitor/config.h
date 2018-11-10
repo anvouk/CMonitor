@@ -35,18 +35,18 @@
 #define CM_STR CM_STR_
 
 #define CM_VERSION_MAJOR 0
-#define CM_VERSION_MINOR 3
-#define CM_VERSION_PATCH 2
+#define CM_VERSION_MINOR 4
+#define CM_VERSION_PATCH 0
 #define CM_VERSION_STATE "beta"
 
-#define _CM_VERSION_STR(major, minor, patch) \
+#define CM_VERSION_MAKE_STR(major, minor, patch) \
 	CM_STR(major) "." \
 	CM_STR(minor) "." \
 	CM_STR(patch) "-" \
 	CM_VERSION_STATE
 
 #define CM_VERSION_STR \
-	_CM_VERSION_STR(CM_VERSION_MAJOR, CM_VERSION_MINOR, CM_VERSION_PATCH)
+	CM_VERSION_MAKE_STR(CM_VERSION_MAJOR, CM_VERSION_MINOR, CM_VERSION_PATCH)
 
 #define CM_VERSION_MAKE(major, minor, patch) \
 	((major) << 16) | ((minor) << 8) | (patch))

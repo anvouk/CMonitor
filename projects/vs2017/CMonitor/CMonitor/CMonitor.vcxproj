@@ -90,6 +90,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)../../../include/;$(SolutionDir)../../../../C4C/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalOptions>-DCMAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -101,6 +102,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)../../../include/;$(SolutionDir)../../../../C4C/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalOptions>-DCMAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -114,6 +116,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)../../../include/;$(SolutionDir)../../../../C4C/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalOptions>-DCMAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -131,6 +134,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)../../../include/;$(SolutionDir)../../../../C4C/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WINDLL;%(PreprocessorDefinitions);</PreprocessorDefinitions>
       <AdditionalOptions>-DCMAPI=__declspec(dllexport) %(AdditionalOptions)</AdditionalOptions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -143,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\..\include\cmonitor\cm.h" />
     <ClInclude Include="..\..\..\..\include\cmonitor\config.h" />
+    <ClInclude Include="..\..\..\..\src\c4c_linked_list.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
