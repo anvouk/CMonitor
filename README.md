@@ -1,3 +1,5 @@
+***DEPRECATED:*** improved version available [here](https://github.com/QwertyQaz414/anv)
+
 # CMonitor
 Keep an eye on every heap operation that happens in your program and spot memory leaks.
 
